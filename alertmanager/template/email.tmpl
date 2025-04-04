@@ -1,0 +1,73 @@
+{{ define "email.default.subject" }}
+[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}
+{{ end }}
+
+{{ define "email.default.html" }}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ template "email.default.subject" . }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .alert {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .critical {
+            border-left: 5px solid #dc3545;
+        }
+        .warning {
+            border-left: 5px solid #ffc107;
+        }
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .value {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>{{ template "email.default.subject" . }}</h2>
+        <p>Status: {{ .Status | toUpper }}</p>
+    </div>
+
+    {{ range .Alerts }}
+    <div class="alert {{ if eq .Status "firing" }}critical{{ else }}warning{{ end }}">
+        <h3>{{ .Labels.alertname }}</h3>
+        <p><span class="label">Status:</span> <span class="value">{{ .Status | toUpper }}</span></p>
+        <p><span class="label">Severity:</span> <span class="value">{{ .Labels.severity }}</span></p>
+        <p><span class="label">Instance:</span> <span class="value">{{ .Labels.instance }}</span></p>
+        <p><span class="label">Summary:</span> <span class="value">{{ .Annotations.summary }}</span></p>
+        <p><span class="label">Description:</span> <span class="value">{{ .Annotations.description }}</span></p>
+        <p><span class="label">Started:</span> <span class="value">{{ .StartsAt }}</span></p>
+        {{ if eq .Status "resolved" }}
+        <p><span class="label">Resolved:</span> <span class="value">{{ .EndsAt }}</span></p>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    <div class="footer">
+        <p>This is an automated message from BTCBuy monitoring system.</p>
+    </div>
+</body>
+</html>
+{{ end }} 
